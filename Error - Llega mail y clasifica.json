@@ -1,0 +1,48 @@
+{
+  "name": "Error - Llega mail y clasifica",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3f1b7c2e-5a41-4c0e-9d3a-1a2b3c4d5e01",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "toRecipients": "gzabala@tecsolgroup.com.ar",
+        "subject": "={{ 'Error en workflow: ' + $json.workflow.name }}",
+        "bodyContent": "={{ (() => { const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); const e = $json.execution || {}; return '<p><strong>Workflow:</strong> ' + esc($json.workflow.name) + '</p><p><strong>Nodo que falló:</strong> ' + esc(e.lastNodeExecuted || '(trigger o fuera de un nodo)') + '</p><p><strong>Error:</strong> ' + esc(e.error && e.error.message) + '</p>' + (e.url ? '<p><a href=\"' + esc(e.url) + '\">Ver ejecución ' + esc(e.id) + '</a></p>' : ''); })() }}",
+        "additionalFields": { "bodyContentType": "html" }
+      },
+      "id": "3f1b7c2e-5a41-4c0e-9d3a-1a2b3c4d5e02",
+      "name": "Avisar error por mail",
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": { "microsoftOutlookOAuth2Api": { "id": "vNEpGkxSRGGBUnSp", "name": "Microsoft Outlook account" } }
+    },
+    {
+      "parameters": {
+        "content": "## Error workflow de *Llega mail y clasifica v8*\nSe ejecuta cuando falla cualquier ejecución del workflow principal y avisa por mail con el nodo y el mensaje de error.\n\nSe asigna en el workflow principal: Settings → Error Workflow.\n\nLimitación: si Outlook es lo que está caído, este aviso también falla. Revisar entonces Executions en n8n.",
+        "height": 160,
+        "width": 420,
+        "color": 7
+      },
+      "id": "3f1b7c2e-5a41-4c0e-9d3a-1a2b3c4d5e03",
+      "name": "Nota - Error workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -200]
+    }
+  ],
+  "connections": {
+    "Error Trigger": { "main": [ [ { "node": "Avisar error por mail", "type": "main", "index": 0 } ] ] }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" }
+}
